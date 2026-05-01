@@ -123,7 +123,7 @@ const VocabularyListPage: React.FC = () => {
       toastService.success("Đã thêm từ mới thành công!");
       fetchWords(1, debouncedSearch, sortBy, order);
     } catch (err) {
-      toastService.error(err || "Không thể thêm từ mới");
+      toastService.error(typeof err === 'string' ? err : "Không thể thêm từ mới");
     } finally {
       setFormLoading(false);
     }
@@ -346,7 +346,6 @@ const VocabularyListPage: React.FC = () => {
               data={myWords}
               pageSize={PAGE_SIZE}
               onDeleteSelected={handleBulkDelete}
-              rowKey="id"
               isServerSide={true}
               totalItems={totalItems}
               currentPage={page}

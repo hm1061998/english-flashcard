@@ -15,7 +15,6 @@ interface TableProps<T> {
   data: T[];
   pageSize?: number;
   onDeleteSelected?: (selectedIds: string[]) => void;
-  rowKey: keyof T;
   isServerSide?: boolean;
   totalItems?: number;
   currentPage?: number;
@@ -31,7 +30,6 @@ const Table = <T extends { id: string }>({
   data,
   pageSize = 10,
   onDeleteSelected,
-  rowKey,
   isServerSide = false,
   totalItems = 0,
   currentPage: externalPage = 1,

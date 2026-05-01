@@ -76,7 +76,7 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleFeedback = (level: string) => {
+  const handleFeedback = (_level: string) => {
     setIsTransitioning(true);
     if (myWords.length > 1) {
       let nextIndex = currentIndex;
