@@ -1,0 +1,339 @@
+@import "../../styles/_variables.less";
+@import "../../styles/_mixins.less";
+
+.custom-table-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  height: 100%;
+  position: relative;
+  background: white;
+
+  // Top loading bar
+  .table-loading-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      @primary-color,
+      transparent
+    );
+    width: 100%;
+    z-index: 100;
+    animation: loadingBar 1.5s infinite linear;
+  }
+
+  &.table-loading {
+    .custom-table {
+      pointer-events: none;
+    }
+  }
+
+  .table-bulk-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: @primary-color;
+    color: white;
+    border-radius: @radius-md;
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .bulk-delete-btn {
+      background: white;
+      color: @danger;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #fee2e2;
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .table-wrapper {
+    flex: 1 1 0%;
+    min-height: 0; // Fixes flexbox internal scrolling
+    height: 100%;
+    overflow: auto;
+    border: 1px solid #eef2f6;
+    border-radius: 12px;
+    background: white;
+  }
+
+  .custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    table-layout: fixed;
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: #f8fafc;
+      z-index: 10;
+    }
+
+    th {
+      padding: 14px 16px;
+      font-size: 0.75rem;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      border-bottom: 2px solid #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+
+      &.sortable-header:hover {
+        color: @primary-color;
+        background: #f1f5f9;
+      }
+    }
+
+    td {
+      padding: 14px 16px;
+      font-size: 0.875rem;
+      color: #1e293b;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+      word-break: break-word;
+    }
+
+    tr {
+      transition: background-color 0.15s;
+
+      &.selected {
+        background: #eef2ff !important;
+      }
+
+      &:hover:not(.selected):not(.skeleton-row) {
+        background: #f8fafc;
+      }
+    }
+
+    .checkbox-col {
+      width: 50px;
+      text-align: center !important;
+      padding: 0;
+
+      input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: @primary-color;
+      }
+    }
+
+    // Skeleton Styles
+    .skeleton-row {
+      td {
+        border-bottom: 1px solid #f8fafc;
+      }
+    }
+
+    .skeleton-box {
+      background: #f1f5f9;
+      background: linear-gradient(90deg, #f1f5f9 25%, #f8fafc 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: skeletonLoading 1.5s infinite ease-in-out;
+      border-radius: 4px;
+    }
+
+    .empty-row {
+      padding: 60px 0;
+      text-align: center;
+      color: #94a3b8;
+      font-style: italic;
+    }
+  }
+
+  .table-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    border-top: 1px solid #f1f5f9;
+    margin-top: auto;
+
+    .pagination-info {
+      font-size: 0.875rem;
+      color: #475569;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #475569;
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      &:not(:disabled):hover {
+        border-color: @primary-color;
+        color: @primary-color;
+        background: #f5f3ff;
+      }
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes loadingBar {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeletonLoading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Mobile Responsiveness
+@media (max-width: 768px) {
+  .custom-table-container {
+    .table-bulk-actions {
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-start;
+
+      .bulk-delete-btn {
+        width: 100%;
+      }
+    }
+
+    .table-wrapper {
+      border: none;
+      background: transparent;
+      overflow: auto;
+      max-height: 50vh;
+    }
+
+    .custom-table {
+      display: block;
+      table-layout: auto;
+
+      thead {
+        display: none;
+      }
+
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100% !important;
+      }
+
+      tr {
+        background: white;
+        border: 1px solid #eef2f6;
+        border-radius: 16px;
+        margin-bottom: 16px;
+        padding: 16px;
+        position: relative;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+        transition: transform 0.2s;
+
+        &.selected {
+          border-color: @primary-color;
+          background: #f5f3ff !important;
+        }
+      }
+
+      td {
+        border: none;
+        padding: 6px 0;
+        text-align: left !important;
+
+        &.checkbox-col {
+          position: absolute;
+          top: 16px;
+          right: 16px;
+          width: auto !important;
+          padding: 0;
+          z-index: 2;
+        }
+
+        &:not(.checkbox-col)::before {
+          content: attr(data-label);
+          display: block;
+          font-size: 0.65rem;
+          font-weight: 800;
+          color: #94a3b8;
+          text-transform: uppercase;
+          margin-bottom: 2px;
+          letter-spacing: 0.05em;
+        }
+
+        &[data-label="Từ vựng"]::before {
+          display: none;
+        }
+
+        &[data-label="Thao tác"] {
+          margin-top: 10px;
+          padding-top: 12px;
+          border-top: 1px solid #f1f5f9;
+
+          &::before {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .table-pagination {
+      padding: 15px 0;
+      gap: 10px;
+
+      button {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+      }
+
+      .pagination-info {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}

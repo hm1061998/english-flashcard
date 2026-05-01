@@ -1,0 +1,229 @@
+@import "../../styles/_variables.less";
+@import "../../styles/_mixins.less";
+
+.flashcard {
+  background-color: transparent;
+  width: 100%;
+  max-width: 350px;
+  height: 420px; // Reduced height since image is removed
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 15px auto;
+
+  .mobile({
+    height: 350px;
+    max-width: 92vw;
+  });
+
+  &-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+    box-shadow: @shadow-lg;
+    border-radius: @radius-lg;
+  }
+
+  &.flipped &-inner {
+    transform: rotateY(180deg);
+  }
+
+  &-front,
+  &-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: @spacing-xl;
+    border-radius: @radius-lg;
+    background: @card-bg;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+
+    .mobile({
+      padding: @spacing-lg @spacing-md;
+    });
+  }
+
+  .speaker-btn {
+    position: absolute;
+    top: @spacing-md;
+    right: @spacing-md;
+    background: #f3f4f6;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: @primary-color;
+    transition: all 0.2s;
+
+    .mobile({
+      width: 32px;
+      height: 32px;
+      top: @spacing-sm;
+      right: @spacing-sm;
+      svg { width: 16px; height: 16px; }
+    });
+
+    &:hover {
+      background: @primary-color;
+      color: white;
+      transform: scale(1.1);
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+  }
+
+  &-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%);
+  }
+
+  &-word {
+    font-size: 1.75rem;
+    @media (min-width: @breakpoint-tablet) {
+      font-size: 2.5rem;
+    }
+    font-weight: 700;
+    color: @primary-color;
+    margin: 0;
+  }
+
+  &-phonetic {
+    color: @text-muted;
+    font-style: italic;
+    margin-top: @spacing-xs;
+  }
+
+  .hint {
+    position: absolute;
+    bottom: @spacing-sm;
+    font-size: 0.75rem;
+    color: lighten(@text-muted, 10%);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    .mobile({
+      bottom: @spacing-sm;
+      font-size: 0.6rem;
+    });
+  }
+
+  .meaning-title {
+    color: @secondary-color;
+    font-size: 1.15rem;
+    margin-bottom: @spacing-sm;
+
+    .mobile({
+      font-size: 1rem;
+      margin-bottom: 4px;
+    });
+  }
+
+  &-meaning {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: @text-main;
+    margin-bottom: @spacing-md;
+    flex: 1;
+    overflow-y: auto; // Allow internal scrolling if meaning is long
+    width: 100%;
+
+    .mobile({
+      font-size: 0.9rem;
+      margin-bottom: @spacing-sm;
+    });
+  }
+
+  .feedback-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    padding-top: @spacing-sm;
+    padding-bottom: @spacing-md;
+
+    .mobile({
+      gap: 5px;
+      padding-bottom: @spacing-sm;
+    });
+
+    .fb-btn {
+      flex: 1;
+      padding: 10px 5px;
+      border: none;
+      border-radius: @radius-md;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition:
+        transform 0.2s,
+        opacity 0.2s;
+      color: white;
+
+      &:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+      }
+
+      &.hard {
+        background-color: @danger;
+      }
+      &.medium {
+        background-color: #f59e0b;
+      }
+      &.easy {
+        background-color: @secondary-color;
+      }
+    }
+  }
+
+  .example-box {
+    margin-top: @spacing-md;
+    padding: @spacing-sm @spacing-md;
+    background: rgba(
+      red(@primary-color),
+      green(@primary-color),
+      blue(@primary-color),
+      0.05
+    );
+    border-radius: @radius-md;
+    width: 100%;
+
+    .mobile({
+      margin-top: 4px;
+      padding: 6px 10px;
+    });
+
+    .example-label {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: @primary-color;
+      margin-bottom: 2px;
+    }
+
+    .flashcard-example {
+      margin: 0;
+      font-style: italic;
+      color: @text-muted;
+      font-size: 0.9rem;
+
+      .mobile({
+        font-size: 0.8rem;
+      });
+    }
+  }
+}

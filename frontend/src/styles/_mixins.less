@@ -1,0 +1,7 @@
+@import './_variables.less';
+
+.mobile(@rules) {
+  @media (max-width: (@breakpoint-tablet - 1px)) {
+    @rules();
+  }
+}
