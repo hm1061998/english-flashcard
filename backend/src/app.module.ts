@@ -22,6 +22,7 @@ import { StatsModule } from './modules/stats/stats.module';
         database: configService.get<string>('DB_NAME', 'english_flashcard'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
+        ssl: configService.get<string>('NODE_ENV') === 'production' || configService.get<string>('DB_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),
