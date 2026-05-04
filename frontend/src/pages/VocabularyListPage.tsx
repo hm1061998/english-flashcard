@@ -18,6 +18,11 @@ interface Word {
   meaning: string;
   example?: string;
   createdAt?: string;
+  topic?: {
+    id: string;
+    name: string;
+    color?: string;
+  };
 }
 
 const VocabularyListPage: React.FC = () => {
@@ -33,6 +38,11 @@ const VocabularyListPage: React.FC = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState<"ASC" | "DESC">("DESC");
+  const [selectedTopicId, setSelectedTopicId] = useState<string>("");
+  const [topics, setTopics] = useState<any[]>([]);
+  const [isManagingTopics, setIsManagingTopics] = useState(false);
+  const [editingTopicId, setEditingTopicId] = useState<string | null>(null);
+  const [editingTopicName, setEditingTopicName] = useState("");
   const PAGE_SIZE = 10;
 
   const [editingWord, setEditingWord] = useState<Word | null>(null);
@@ -40,12 +50,13 @@ const VocabularyListPage: React.FC = () => {
   const [formLoading, setFormLoading] = useState(false);
 
   const fetchWords = useCallback(
-    async (targetPage: number, search: string, sort: string, ord: string) => {
+    async (targetPage: number, search: string, sort: string, ord: string, topicId: string) => {
       setLoading(true);
       try {
-        const response: any = await apiService.get(
-          `/flashcards?page=${targetPage}&limit=${PAGE_SIZE}&search=${search}&sortBy=${sort}&order=${ord}`,
-        );
+        let url = `/flashcards?page=${targetPage}&limit=${PAGE_SIZE}&search=${search}&sortBy=${sort}&order=${ord}`;
+        if (topicId) url += `&topicId=${topicId}`;
+        
+        const response: any = await apiService.get(url);
 
         const data = response.data || [];
         const meta = response.meta || { total: 0 };
@@ -66,6 +77,21 @@ const VocabularyListPage: React.FC = () => {
     [],
   );
 
+  const fetchTopics = useCallback(async () => {
+    try {
+      const data: any = await apiService.get("/topics");
+      setTopics(data || []);
+    } catch (err) {
+      console.error("Failed to fetch topics", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchTopics();
+    }
+  }, [isAuthenticated, fetchTopics]);
+
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
@@ -75,8 +101,8 @@ const VocabularyListPage: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetchWords(page, debouncedSearch, sortBy, order);
-  }, [isAuthenticated, page, debouncedSearch, sortBy, order, fetchWords]);
+    fetchWords(page, debouncedSearch, sortBy, order, selectedTopicId);
+  }, [isAuthenticated, page, debouncedSearch, sortBy, order, selectedTopicId, fetchWords]);
 
   useEffect(() => {
     setPage(1);
@@ -121,7 +147,8 @@ const VocabularyListPage: React.FC = () => {
       await apiService.post("/flashcards", formData);
       setIsAdding(false);
       toastService.success("Đã thêm từ mới thành công!");
-      fetchWords(1, debouncedSearch, sortBy, order);
+      fetchWords(1, debouncedSearch, sortBy, order, selectedTopicId);
+      fetchTopics(); // Refresh topics list in case a new one was created
     } catch (err) {
       toastService.error(typeof err === 'string' ? err : "Không thể thêm từ mới");
     } finally {
@@ -136,11 +163,42 @@ const VocabularyListPage: React.FC = () => {
       await apiService.patch(`/flashcards/${editingWord.id}`, formData);
       setEditingWord(null);
       toastService.success("Cập nhật từ vựng thành công!");
-      fetchWords(page, debouncedSearch, sortBy, order);
+      fetchWords(page, debouncedSearch, sortBy, order, selectedTopicId);
+      fetchTopics();
     } catch (err) {
       toastService.error("Không thể cập nhật từ vựng");
     } finally {
       setFormLoading(false);
+    }
+  };
+
+  const handleUpdateTopic = async () => {
+    if (!editingTopicId || !editingTopicName.trim()) return;
+    try {
+      await apiService.patch(`/topics/${editingTopicId}`, { name: editingTopicName.trim() });
+      toastService.success("Cập nhật chủ đề thành công!");
+      setEditingTopicId(null);
+      fetchTopics();
+      fetchWords(page, debouncedSearch, sortBy, order, selectedTopicId);
+    } catch (err) {
+      toastService.error("Không thể cập nhật chủ đề");
+    }
+  };
+
+  const handleDeleteTopic = async (id: string) => {
+    const confirmed = await modalService.danger(
+      "Bạn có chắc chắn muốn xóa chủ đề này? Các từ vựng thuộc chủ đề này sẽ không bị xóa nhưng sẽ không còn thuộc chủ đề nào.",
+      "Xóa chủ đề"
+    );
+    if (!confirmed) return;
+    try {
+      await apiService.delete(`/topics/${id}`);
+      toastService.success("Đã xóa chủ đề!");
+      if (selectedTopicId === id) setSelectedTopicId("");
+      fetchTopics();
+      fetchWords(page, debouncedSearch, sortBy, order, "");
+    } catch (err) {
+      toastService.error("Không thể xóa chủ đề");
     }
   };
 
@@ -165,7 +223,24 @@ const VocabularyListPage: React.FC = () => {
         </div>
       ),
     },
-    { header: "Nghĩa của từ", key: "meaning", width: "35%", sortable: true },
+    { header: "Nghĩa của từ", key: "meaning", width: "25%", sortable: true },
+    {
+      header: "Chủ đề",
+      key: "topic",
+      width: "15%",
+      render: (w: Word) => w.topic ? (
+        <span 
+          className="topic-tag" 
+          style={{ 
+            backgroundColor: `${w.topic.color || '#4f46e5'}15`, 
+            color: w.topic.color || '#4f46e5',
+            borderColor: `${w.topic.color || '#4f46e5'}30`
+          }}
+        >
+          {w.topic.name}
+        </span>
+      ) : <span className="no-topic">Không có</span>
+    },
     {
       header: "Ngày tạo",
       key: "createdAt",
@@ -290,15 +365,41 @@ const VocabularyListPage: React.FC = () => {
           </div>
         </header>
 
-        <div className="search-container">
-          <span className="search-icon">🔍</span>
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Tìm kiếm từ vựng hoặc nghĩa..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+        <div className="search-bar">
+          <div className="search-input-wrapper">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Tìm kiếm từ vựng hoặc nghĩa..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="topic-filters-container">
+          <div className="topic-filters">
+            <button 
+              className={`topic-chip ${selectedTopicId === "" ? "active" : ""}`}
+              onClick={() => setSelectedTopicId("")}
+            >
+              Tất cả
+            </button>
+            {topics.map((t) => (
+              <button
+                key={t.id}
+                className={`topic-chip ${selectedTopicId === t.id ? "active" : ""}`}
+                onClick={() => setSelectedTopicId(t.id)}
+                style={selectedTopicId === t.id ? { backgroundColor: t.color || '#4f46e5', color: 'white' } : {}}
+              >
+                {t.name}
+              </button>
+            ))}
+            <button className="manage-topics-btn" onClick={() => setIsManagingTopics(true)}>
+              ⚙️ Quản lý
+            </button>
+          </div>
         </div>
 
         <div className="content-area">
@@ -328,6 +429,7 @@ const VocabularyListPage: React.FC = () => {
                       phonetic: editingWord.phonetic,
                       meaning: editingWord.meaning,
                       example: editingWord.example || "",
+                      topicId: editingWord.topic?.id || "",
                     }
                   : undefined
               }
@@ -336,6 +438,45 @@ const VocabularyListPage: React.FC = () => {
               submitLabel="Cập nhật"
               loading={formLoading}
             />
+          </Modal>
+
+          <Modal
+            isOpen={isManagingTopics}
+            onClose={() => setIsManagingTopics(false)}
+            title="Quản lý chủ đề"
+          >
+            <div className="topic-manager">
+              {topics.map((t) => (
+                <div key={t.id} className="topic-manage-item">
+                  {editingTopicId === t.id ? (
+                    <div className="edit-topic-row">
+                      <input 
+                        type="text" 
+                        value={editingTopicName}
+                        onChange={(e) => setEditingTopicName(e.target.value)}
+                        className="form-input"
+                        autoFocus
+                      />
+                      <button onClick={handleUpdateTopic} className="save-btn">Lưu</button>
+                      <button onClick={() => setEditingTopicId(null)} className="cancel-btn">Hủy</button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="topic-name">{t.name}</span>
+                      <div className="topic-actions">
+                        <button onClick={() => {
+                          setEditingTopicId(t.id);
+                          setEditingTopicName(t.name);
+                        }}>Sửa</button>
+                        <button className="delete" onClick={() => handleDeleteTopic(t.id)}>Xóa</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+              {topics.length === 0 && <p className="empty-msg">Chưa có chủ đề nào.</p>}
+              <Button style={{ marginTop: '20px', width: '100%' }} onClick={() => setIsManagingTopics(false)}>Đóng</Button>
+            </div>
           </Modal>
 
           {loading ? (

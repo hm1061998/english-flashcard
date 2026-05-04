@@ -8,6 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { User } from '../users/user.entity';
+import { Topic } from '../topics/topic.entity';
 
 @Entity('flashcards')
 @Index(['user', 'createdAt']) // Compound index for efficient user-specific sorted listing
@@ -43,4 +44,7 @@ export class Flashcard {
 
   @ManyToOne(() => User, (user) => user.flashcards, { nullable: false, onDelete: 'CASCADE' })
   user: User;
+
+  @ManyToOne(() => Topic, (topic) => topic.flashcards, { nullable: true, onDelete: 'SET NULL' })
+  topic: Topic | null;
 }

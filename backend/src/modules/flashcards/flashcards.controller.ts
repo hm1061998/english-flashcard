@@ -31,8 +31,9 @@ export class FlashcardsController {
     @Query('search') search?: string,
     @Query('sortBy') sortBy: string = 'createdAt',
     @Query('order') order: 'ASC' | 'DESC' = 'DESC',
+    @Query('topicId') topicId?: string,
   ) {
-    return this.flashcardsService.findAll(req.user.id, +page, +limit, search, sortBy, order);
+    return this.flashcardsService.findAll(req.user.id, +page, +limit, search, sortBy, order, topicId);
   }
 
   @Get(':id')

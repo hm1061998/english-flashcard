@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { apiService } from '@/services/api';
 import { logout } from '@/features/auth/authSlice';
+import FlashcardForm from '@/components/FlashcardForm/FlashcardForm';
+import { modalService, Modal } from "@/libs/Modal";
 
 interface Word {
   id?: string;
@@ -19,13 +21,7 @@ const HomePage: React.FC = () => {
   const dispatch = useDispatch();
   const { isAuthenticated, user } = useSelector((state: any) => state.auth);
 
-  const [isAdding, setIsAdding] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [loading, setLoading] = useState(true);
-  
-  const [word, setWord] = useState('');
-  const [phonetic, setPhonetic] = useState('');
-  const [meaning, setMeaning] = useState('');
+  const [formLoading, setFormLoading] = useState(false);
 
   const [displayConfig, setDisplayConfig] = useState({
     showWord: true,
@@ -37,6 +33,9 @@ const HomePage: React.FC = () => {
   const [myWords, setMyWords] = useState<Word[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Auth Check
   useEffect(() => {
@@ -64,15 +63,16 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const handleSave = async () => {
-    if (!word || !meaning) return;
+  const handleSave = async (formData: any) => {
+    setFormLoading(true);
     try {
-      const newEntry: any = await apiService.post('/flashcards', { word, phonetic, meaning, example: 'Ví dụ mới' });
+      const newEntry: any = await apiService.post('/flashcards', formData);
       setMyWords([newEntry, ...myWords]);
       setIsAdding(false);
-      setWord(''); setPhonetic(''); setMeaning('');
     } catch (err) {
-      alert('Không thể lưu từ vựng');
+      alert(typeof err === 'string' ? err : 'Không thể lưu từ vựng');
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -132,17 +132,18 @@ const HomePage: React.FC = () => {
             </div>
           )}
 
-          {isAdding && (
-            <div className="add-word-form" style={overlayStyle}>
-              <h3 style={{ marginBottom: '10px' }}>Thêm từ mới</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <input type="text" placeholder="Từ vựng" value={word} onChange={(e) => setWord(e.target.value)} style={inputStyle} />
-                <input type="text" placeholder="Phiên âm" value={phonetic} onChange={(e) => setPhonetic(e.target.value)} style={inputStyle} />
-                <input type="text" placeholder="Nghĩa" value={meaning} onChange={(e) => setMeaning(e.target.value)} style={inputStyle} />
-                <Button size="sm" onClick={handleSave}>Lưu</Button>
-              </div>
-            </div>
-          )}
+          <Modal
+            isOpen={isAdding}
+            onClose={() => setIsAdding(false)}
+            title="Thêm từ vựng mới"
+          >
+            <FlashcardForm
+              onSubmit={handleSave}
+              onCancel={() => setIsAdding(false)}
+              submitLabel="Thêm mới"
+              loading={formLoading}
+            />
+          </Modal>
 
           <main className={`active-card-container ${isTransitioning ? 'card-exit' : 'card-enter'}`} style={{ 
             flex: 1,

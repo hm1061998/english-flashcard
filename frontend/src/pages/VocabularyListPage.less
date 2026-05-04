@@ -106,43 +106,150 @@
     });
   }
 
-  .search-container {
-    margin-bottom: 20px;
-    padding: 15px 0;
-    background: white;
-    z-index: 90;
+  .search-bar {
+    margin-bottom: 12px;
+    padding-top: 15px;
+    
+    .search-input-wrapper {
+      position: relative;
+      
+      .search-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+      }
 
-    .mobile({
-      position: sticky;
-      top: 125px; // Approx mobile header height
-      padding: 10px 0;
-    });
+      .search-input {
+        width: 100%;
+        padding: 12px 15px 12px 45px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.2s;
 
-    .search-icon {
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-      pointer-events: none;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 12px 15px 12px 45px;
-      border-radius: 12px;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      font-size: 0.95rem;
-      outline: none;
-      transition: all 0.2s;
-
-      &:focus {
-        border-color: @primary-color;
-        background: white;
-        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+        &:focus {
+          border-color: @primary-color;
+          background: white;
+          box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+        }
       }
     }
+  }
+
+  .topic-filters-container {
+    position: relative;
+    margin-bottom: 5px;
+
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 40px;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    &::before {
+      left: 0;
+      background: linear-gradient(to right, white, rgba(255, 255, 255, 0));
+    }
+
+    &::after {
+      right: 0;
+      background: linear-gradient(to left, white, rgba(255, 255, 255, 0));
+    }
+
+    .topic-filters {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 5px 20px 15px;
+      margin: 0 -20px;
+      scrollbar-width: none;
+      &::-webkit-scrollbar { display: none; }
+
+      .topic-chip {
+        padding: 6px 16px;
+        border-radius: 20px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        flex-shrink: 0;
+
+        &:hover {
+          background: #e2e8f0;
+          color: #475569;
+        }
+
+        &.active {
+          background: @primary-color;
+          color: white;
+          box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+        }
+      }
+
+      .manage-topics-btn {
+        padding: 6px 12px;
+        background: none;
+        border: 1px dashed #cbd5e1;
+        color: #64748b;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        white-space: nowrap;
+        margin-left: 8px;
+        transition: all 0.2s;
+
+        &:hover {
+          background: #f8fafc;
+          border-color: @primary-color;
+          color: @primary-color;
+        }
+      }
+    }
+
+    .mobile({
+      margin: 0 -15px;
+      
+      &::before, &::after {
+        width: 25px;
+      }
+      
+      .topic-filters {
+        padding: 10px 15px 15px;
+        margin: 0;
+      }
+    });
+  }
+
+  .topic-tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1.4;
+    border: 1px solid transparent;
+    // We'll use inline styles for the dynamic colors, 
+    // but define common transitions/font properties here
+    transition: all 0.2s;
+  }
+
+  .no-topic {
+    color: #cbd5e1;
+    font-size: 0.8rem;
   }
 
   .content-area {
@@ -241,6 +348,91 @@
       strong {
         color: #64748b;
       }
+    }
+  }
+  .topic-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0;
+
+    .topic-manage-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+
+      .topic-name {
+        font-weight: 600;
+        color: #1e293b;
+      }
+
+      .topic-actions {
+        display: flex;
+        gap: 8px;
+
+        button {
+          background: none;
+          border: none;
+          padding: 4px 8px;
+          font-size: 0.8rem;
+          font-weight: 600;
+          cursor: pointer;
+          color: @primary-color;
+
+          &.delete {
+            color: #ef4444;
+          }
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      .edit-topic-row {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+
+        input {
+          flex: 1;
+          padding: 8px 12px;
+          border-radius: 6px;
+          border: 1px solid #e2e8f0;
+          outline: none;
+          font-size: 0.9rem;
+          &:focus { border-color: @primary-color; }
+        }
+
+        button {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: none;
+          cursor: pointer;
+          font-weight: 600;
+          font-size: 0.8rem;
+
+          &.save-btn {
+            background: @primary-color;
+            color: white;
+          }
+
+          &.cancel-btn {
+            background: #e2e8f0;
+            color: #475569;
+          }
+        }
+      }
+    }
+
+    .empty-msg {
+      text-align: center;
+      color: #94a3b8;
+      font-style: italic;
     }
   }
 }

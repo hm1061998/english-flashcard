@@ -7,6 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Flashcard } from '../flashcards/flashcard.entity';
+import { Topic } from '../topics/topic.entity';
 
 @Entity('users')
 export class User {
@@ -30,4 +31,7 @@ export class User {
 
   @OneToMany(() => Flashcard, (flashcard) => flashcard.user)
   flashcards: Flashcard[];
+
+  @OneToMany(() => Topic, (topic) => topic.user)
+  topics: Topic[];
 }

@@ -26,6 +26,11 @@ export class CreateFlashcardDto {
   @IsUrl()
   @IsOptional()
   imageUrl?: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  topicId?: string;
 }
 
 export class UpdateFlashcardDto extends CreateFlashcardDto {}

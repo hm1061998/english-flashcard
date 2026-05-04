@@ -12,7 +12,7 @@ const initialState: AuthState = {
   user: null,
   token: localStorage.getItem('token'),
   isAuthenticated: !!localStorage.getItem('token'),
-  loading: false,
+  loading: !!localStorage.getItem('token'),
   error: null,
 };
 
@@ -41,8 +41,15 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem('token');
     },
+    setUser: (state, action: PayloadAction<any>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+    },
+    finishLoading: (state) => {
+      state.loading = false;
+    }
   },
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
+export const { loginStart, loginSuccess, loginFailure, logout, setUser, finishLoading } = authSlice.actions;
 export default authSlice.reducer;

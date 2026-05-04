@@ -17,20 +17,30 @@ export class FlashcardsService {
     limit: number = 10, 
     search?: string,
     sortBy: string = 'createdAt',
-    order: 'ASC' | 'DESC' = 'DESC'
+    order: 'ASC' | 'DESC' = 'DESC',
+    topicId?: string
   ): Promise<{ data: Flashcard[], meta: any }> {
     const skip = (page - 1) * limit;
     
-    const where = search ? [
+    const where: any = search ? [
       { user: { id: userId }, word: ILike(`%${search}%`) },
       { user: { id: userId }, meaning: ILike(`%${search}%`) }
     ] : { user: { id: userId } };
+
+    if (topicId) {
+      if (Array.isArray(where)) {
+        where.forEach(w => w.topic = { id: topicId });
+      } else {
+        where.topic = { id: topicId };
+      }
+    }
 
     const [data, total] = await this.flashcardRepository.findAndCount({ 
       where,
       order: { [sortBy]: order },
       take: limit,
-      skip: skip
+      skip: skip,
+      relations: ['topic']
     });
 
     return {
@@ -46,7 +56,8 @@ export class FlashcardsService {
 
   async findOne(id: string, userId: string): Promise<Flashcard> {
     const flashcard = await this.flashcardRepository.findOne({ 
-      where: { id, user: { id: userId } } 
+      where: { id, user: { id: userId } },
+      relations: ['topic']
     });
     if (!flashcard) {
       throw new NotFoundException(`Flashcard with ID ${id} not found`);
@@ -65,7 +76,8 @@ export class FlashcardsService {
 
     const flashcard = this.flashcardRepository.create({
       ...createFlashcardDto,
-      user: { id: userId }
+      user: { id: userId } as any,
+      topic: createFlashcardDto.topicId ? { id: createFlashcardDto.topicId } as any : null
     });
     return this.flashcardRepository.save(flashcard);
   }
@@ -94,7 +106,7 @@ export class FlashcardsService {
         // Create new record
         toSave.push(this.flashcardRepository.create({
           ...dto,
-          user: { id: userId }
+          user: { id: userId } as any
         }));
       }
     }
@@ -104,7 +116,11 @@ export class FlashcardsService {
 
   async update(id: string, updateFlashcardDto: UpdateFlashcardDto, userId: string): Promise<Flashcard> {
     const flashcard = await this.findOne(id, userId);
-    Object.assign(flashcard, updateFlashcardDto);
+    const { topicId, ...rest } = updateFlashcardDto;
+    Object.assign(flashcard, rest);
+    if (topicId !== undefined) {
+      flashcard.topic = topicId ? { id: topicId } as any : null;
+    }
     return this.flashcardRepository.save(flashcard);
   }
 

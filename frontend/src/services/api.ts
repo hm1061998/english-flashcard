@@ -55,6 +55,8 @@ class ApiService {
           localStorage.removeItem("token");
           if (window.location.pathname.includes("/admin")) {
             window.location.href = "/admin/login";
+          } else {
+            window.location.href = "/login";
           }
         }
         return Promise.reject(message);

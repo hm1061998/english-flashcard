@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { apiService } from '@/services/api';
 import Button from '../Button/Button';
 
 interface FormData {
@@ -7,6 +8,7 @@ interface FormData {
   phonetic: string;
   meaning: string;
   example: string;
+  topicId?: string;
 }
 
 interface FlashcardFormProps {
@@ -28,6 +30,7 @@ const FlashcardForm: React.FC<FlashcardFormProps> = ({
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isValid }
   } = useForm<FormData>({
     mode: 'onChange',
@@ -35,9 +38,38 @@ const FlashcardForm: React.FC<FlashcardFormProps> = ({
       word: '',
       phonetic: '',
       meaning: '',
-      example: ''
+      example: '',
+      topicId: ''
     }
   });
+  const [topics, setTopics] = React.useState<any[]>([]);
+  const [showNewTopicInput, setShowNewTopicInput] = React.useState(false);
+  const [newTopicName, setNewTopicName] = React.useState('');
+
+  useEffect(() => {
+    const fetchTopics = async () => {
+      try {
+        const response: any = await apiService.get('/topics');
+        setTopics(response || []);
+      } catch (err) {
+        console.error('Failed to fetch topics', err);
+      }
+    };
+    fetchTopics();
+  }, []);
+
+  const handleCreateTopic = async () => {
+    if (!newTopicName.trim()) return;
+    try {
+      const response: any = await apiService.post('/topics', { name: newTopicName.trim() });
+      setTopics([...topics, response]);
+      setValue('topicId', response.id);
+      setNewTopicName('');
+      setShowNewTopicInput(false);
+    } catch (err) {
+      console.error('Failed to create topic', err);
+    }
+  };
 
   useEffect(() => {
     if (initialData) {
@@ -78,6 +110,40 @@ const FlashcardForm: React.FC<FlashcardFormProps> = ({
           className={`form-input ${errors.meaning ? 'error' : ''}`}
         />
         {errors.meaning && <span className="form-error">{errors.meaning.message}</span>}
+      </div>
+
+      <div className="form-group">
+        <label>Chủ đề</label>
+        {!showNewTopicInput ? (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <select 
+              {...register('topicId')}
+              className="form-input"
+              style={{ flex: 1 }}
+            >
+              <option value="">Chọn chủ đề</option>
+              {topics.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewTopicInput(true)}>
+              + Mới
+            </Button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <input 
+              type="text"
+              className="form-input"
+              placeholder="Tên chủ đề mới..."
+              value={newTopicName}
+              onChange={(e) => setNewTopicName(e.target.value)}
+              style={{ flex: 1 }}
+            />
+            <Button type="button" size="sm" onClick={handleCreateTopic}>Lưu</Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => setShowNewTopicInput(false)}>Hủy</Button>
+          </div>
+        )}
       </div>
 
       <div className="form-group">
