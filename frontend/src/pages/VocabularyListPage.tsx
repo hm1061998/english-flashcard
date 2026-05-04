@@ -117,7 +117,7 @@ const VocabularyListPage: React.FC = () => {
     try {
       await apiService.delete(`/flashcards/${id}`);
       toastService.success("Đã xóa từ vựng thành công!");
-      fetchWords(page, debouncedSearch, sortBy, order);
+      fetchWords(page, debouncedSearch, sortBy, order, selectedTopicId);
     } catch (err) {
       toastService.error("Không thể xóa từ vựng. Vui lòng thử lại.");
     }
@@ -134,10 +134,10 @@ const VocabularyListPage: React.FC = () => {
         ids.map((id) => apiService.delete(`/flashcards/${id}`)),
       );
       toastService.success(`Đã xóa thành công ${ids.length} từ!`);
-      fetchWords(page, debouncedSearch, sortBy, order);
+      fetchWords(page, debouncedSearch, sortBy, order, selectedTopicId);
     } catch (err) {
       toastService.error("Có lỗi xảy ra khi xóa hàng loạt");
-      fetchWords(page, debouncedSearch, sortBy, order);
+      fetchWords(page, debouncedSearch, sortBy, order, selectedTopicId);
     }
   };
 
@@ -320,7 +320,7 @@ const VocabularyListPage: React.FC = () => {
         try {
           await apiService.post("/flashcards/bulk", newWords);
           toastService.success(`Đã nhập thành công ${newWords.length} từ!`);
-          fetchWords(1, "", sortBy, order);
+          fetchWords(1, "", sortBy, order, selectedTopicId);
         } catch (err) {
           toastService.error("Có lỗi xảy ra khi nhập dữ liệu");
         }
