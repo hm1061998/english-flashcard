@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { apiService } from '@/services/api';
 import { logout } from '@/features/auth/authSlice';
 import FlashcardForm from '@/components/FlashcardForm/FlashcardForm';
-import { modalService, Modal } from "@/libs/Modal";
+import { Modal } from "@/libs/Modal";
 
 interface Word {
   id?: string;
@@ -200,14 +200,6 @@ const overlayStyle: React.CSSProperties = {
   borderRadius: '12px',
   boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
   border: '1px solid #e5e7eb'
-};
-
-const inputStyle: React.CSSProperties = {
-  padding: '10px',
-  borderRadius: '6px',
-  border: '1px solid #e5e7eb',
-  outline: 'none',
-  fontSize: '0.9rem'
 };
 
 const checkboxLabelStyle: React.CSSProperties = {

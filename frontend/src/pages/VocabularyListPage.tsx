@@ -50,7 +50,7 @@ const VocabularyListPage: React.FC = () => {
   const [formLoading, setFormLoading] = useState(false);
 
   const fetchWords = useCallback(
-    async (targetPage: number, search: string, sort: string, ord: string, topicId: string) => {
+    async (targetPage: number, search: string, sort: string, ord: string, topicId?: string) => {
       setLoading(true);
       try {
         let url = `/flashcards?page=${targetPage}&limit=${PAGE_SIZE}&search=${search}&sortBy=${sort}&order=${ord}`;

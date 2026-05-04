@@ -5,7 +5,7 @@ import { setUser, logout, finishLoading } from '@/features/auth/authSlice';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
-  const { token, isAuthenticated } = useSelector((state: any) => state.auth);
+  const { token } = useSelector((state: any) => state.auth);
 
   useEffect(() => {
     const checkAuth = async () => {
