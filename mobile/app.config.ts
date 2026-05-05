@@ -43,6 +43,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-sqlite",
       "expo-web-browser",
       "expo-secure-store",
+      "expo-font"
     ],
     extra: {
       env: env,
