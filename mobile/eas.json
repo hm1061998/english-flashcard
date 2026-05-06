@@ -7,30 +7,31 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "development"
       }
     },
     "test": {
       "distribution": "internal",
+      "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_ENV": "test",
-        "EXPO_PUBLIC_API_URL": "https://api-test.yourdomain.com"
+        "EXPO_PUBLIC_ENV": "test"
       }
     },
     "preview": {
       "distribution": "internal",
       "channel": "preview",
+      "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_ENV": "preview"
       }
     },
     "production": {
-      "autoIncrement": true,
       "channel": "production",
+      "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_ENV": "production",
-        "EXPO_PUBLIC_API_URL": "https://api.yourdomain.com"
+        "EXPO_PUBLIC_ENV": "production"
       }
     }
   },

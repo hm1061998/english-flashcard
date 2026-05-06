@@ -13,7 +13,13 @@ export interface ApiResponse<T = any> {
   message: string;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ? `${process.env.EXPO_PUBLIC_API_URL}/api` : "http://localhost:3000/api";
+import Constants from 'expo-constants';
+
+// Lấy apiUrl từ app.config.ts (đã được nạp từ .env)
+const configApiUrl = Constants.expoConfig?.extra?.apiUrl;
+const rawApiUrl = configApiUrl || process.env.EXPO_PUBLIC_API_URL;
+
+const API_BASE_URL = rawApiUrl ? `${rawApiUrl}/api` : "http://localhost:3000/api";
 
 class ApiService {
   private instance: AxiosInstance;

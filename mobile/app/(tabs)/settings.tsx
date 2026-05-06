@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { logout } from '@/store/slices/authSlice';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
 export default function SettingsScreen() {
   const dispatch = useDispatch();
@@ -47,8 +48,8 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.infoBox}>
-        <Text style={styles.infoText}>Phiên bản ứng dụng: 1.0.0</Text>
-        <Text style={styles.infoText}>Môi trường: {process.env.EXPO_PUBLIC_ENV}</Text>
+        <Text style={styles.infoText}>Phiên bản ứng dụng: {Constants.expoConfig?.version || '1.0.0'}</Text>
+        <Text style={styles.infoText}>Môi trường: {process.env.EXPO_PUBLIC_ENV || 'Production'}</Text>
       </View>
     </View>
   );
