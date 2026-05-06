@@ -13,7 +13,11 @@
     "build:dev": "eas build --profile development --platform android",
     "build:test": "eas build --profile test --platform android",
     "build:preview": "eas build --profile preview --platform android",
-    "build:prod": "eas build --profile production --platform android"
+    "build:prod": "eas build --profile production --platform android",
+    "update:dev": "eas update --branch development --message \"Update dev\"",
+    "update:test": "eas update --branch test --message \"Update test\"",
+    "update:preview": "eas update --branch preview --message \"Update preview\"",
+    "update:prod": "eas update --branch production --message \"Update production\""
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

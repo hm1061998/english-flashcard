@@ -8,6 +8,7 @@ import { store, RootState } from '@/store';
 import { setAuth, logout } from '@/store/slices/authSlice';
 import * as SecureStore from 'expo-secure-store';
 import apiClient from '@/api/client';
+import * as Updates from 'expo-updates';
 
 // Configure notifications behavior
 Notifications.setNotificationHandler({
@@ -50,6 +51,20 @@ function AppContent() {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    async function onFetchUpdateAsync() {
+      try {
+        if (__DEV__) return;
+        const update = await Updates.checkForUpdateAsync();
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          await Updates.reloadAsync();
+        }
+      } catch (error) {
+        console.log(`Error fetching latest Expo update: ${error}`);
+      }
+    }
+    onFetchUpdateAsync();
+
     const checkAuth = async () => {
       try {
         const token = await SecureStore.getItemAsync('auth_token');
