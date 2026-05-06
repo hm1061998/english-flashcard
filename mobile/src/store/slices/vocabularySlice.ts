@@ -5,11 +5,13 @@ interface Flashcard {
   word: string;
   definition: string;
   example?: string;
+  topicId?: string;
   synced?: boolean;
 }
 
 interface VocabularyState {
   cards: Flashcard[];
+  selectedTopicId: string | null;
   isOffline: boolean;
   loading: boolean;
   error: string | null;
@@ -17,6 +19,7 @@ interface VocabularyState {
 
 const initialState: VocabularyState = {
   cards: [],
+  selectedTopicId: null,
   isOffline: false,
   loading: false,
   error: null,
@@ -28,6 +31,9 @@ const vocabularySlice = createSlice({
   reducers: {
     setCards: (state, action: PayloadAction<Flashcard[]>) => {
       state.cards = action.payload;
+    },
+    setSelectedTopicId: (state, action: PayloadAction<string | null>) => {
+      state.selectedTopicId = action.payload;
     },
     addCard: (state, action: PayloadAction<Flashcard>) => {
       state.cards.push(action.payload);
@@ -44,5 +50,13 @@ const vocabularySlice = createSlice({
   },
 });
 
-export const { setCards, addCard, setLoading, setError, toggleOffline } = vocabularySlice.actions;
+export const { 
+  setCards, 
+  setSelectedTopicId, 
+  addCard, 
+  setLoading, 
+  setError, 
+  toggleOffline 
+} = vocabularySlice.actions;
+
 export default vocabularySlice.reducer;
