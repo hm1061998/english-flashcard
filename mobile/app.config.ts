@@ -26,6 +26,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
+    platforms: ["ios", "android"],
     ios: {
       supportsTablet: true,
       bundleIdentifier: bundleIdentifier,
