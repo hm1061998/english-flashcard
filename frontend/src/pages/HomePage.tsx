@@ -36,25 +36,49 @@ const HomePage: React.FC = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [selectedTopicId, setSelectedTopicId] = useState<string>('');
+  const [topics, setTopics] = useState<any[]>([]);
 
   // Auth Check
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
     } else {
-      fetchWords();
+      fetchTopics();
     }
   }, [isAuthenticated]);
 
-  const fetchWords = async () => {
+  // Fetch words on topic change
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchWords(selectedTopicId);
+    }
+  }, [isAuthenticated, selectedTopicId]);
+
+  const fetchTopics = async () => {
+    try {
+      const response: any = await apiService.get('/topics');
+      setTopics(response || []);
+    } catch (err) {
+      console.error('Failed to fetch topics', err);
+    }
+  };
+
+  const fetchWords = async (topicId?: string) => {
     setLoading(true);
     try {
       // Fetch a larger batch for randomized learning
-      const response: any = await apiService.get('/flashcards?page=1&limit=100');
+      let url = '/flashcards?page=1&limit=100';
+      if (topicId) {
+        url += `&topicId=${topicId}`;
+      }
+      const response: any = await apiService.get(url);
       const words = response.data || [];
       setMyWords(words);
       if (words.length > 0) {
         setCurrentIndex(Math.floor(Math.random() * words.length));
+      } else {
+        setCurrentIndex(0);
       }
     } catch (err) {
       console.error('Failed to fetch words', err);
@@ -66,8 +90,11 @@ const HomePage: React.FC = () => {
   const handleSave = async (formData: any) => {
     setFormLoading(true);
     try {
-      const newEntry: any = await apiService.post('/flashcards', formData);
-      setMyWords([newEntry, ...myWords]);
+      await apiService.post('/flashcards', formData);
+      await Promise.all([
+        fetchTopics(),
+        fetchWords(selectedTopicId)
+      ]);
       setIsAdding(false);
     } catch (err) {
       alert(typeof err === 'string' ? err : 'Không thể lưu từ vựng');
@@ -145,6 +172,28 @@ const HomePage: React.FC = () => {
             />
           </Modal>
 
+          {/* Topic Filters */}
+          <div className="topic-filters-container">
+            <div className="topic-filters">
+              <button 
+                className={`topic-chip ${selectedTopicId === "" ? "active" : ""}`}
+                onClick={() => setSelectedTopicId("")}
+              >
+                Tất cả
+              </button>
+              {topics.map((t) => (
+                <button
+                  key={t.id}
+                  className={`topic-chip ${selectedTopicId === t.id ? "active" : ""}`}
+                  onClick={() => setSelectedTopicId(t.id)}
+                  style={selectedTopicId === t.id ? { backgroundColor: t.color || '#4f46e5', color: 'white' } : {}}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <main className={`active-card-container ${isTransitioning ? 'card-exit' : 'card-enter'}`} style={{ 
             flex: 1,
             display: 'flex',
@@ -165,11 +214,78 @@ const HomePage: React.FC = () => {
               />
             ) : (
               <div style={{ textAlign: 'center', color: '#9ca3af' }}>
-                <p>Bạn chưa có từ vựng nào.</p>
-                <Button size="sm" onClick={() => setIsAdding(true)}>Thêm từ đầu tiên</Button>
+                <p>{selectedTopicId ? 'Bạn chưa có từ vựng nào trong chủ đề này.' : 'Bạn chưa có từ vựng nào.'}</p>
+                <Button size="sm" onClick={() => setIsAdding(true)}>
+                  {selectedTopicId ? 'Thêm từ mới' : 'Thêm từ đầu tiên'}
+                </Button>
               </div>
             )}
           </main>
+
+          <style>{`
+            .topic-filters-container {
+              position: relative;
+              margin-bottom: 20px;
+              padding: 0 10px;
+              border-bottom: 1px solid #f1f5f9;
+            }
+            .topic-filters {
+              display: flex;
+              gap: 10px;
+              overflow-x: auto;
+              padding: 8px 0 15px;
+              scrollbar-width: none; /* Firefox */
+            }
+            .topic-filters::-webkit-scrollbar {
+              display: none; /* Safari and Chrome */
+            }
+            .topic-chip {
+              padding: 8px 20px;
+              border-radius: 20px;
+              background: #f1f5f9;
+              color: #64748b;
+              font-size: 0.85rem;
+              font-weight: 600;
+              white-space: nowrap;
+              cursor: pointer;
+              border: 1px solid transparent;
+              transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+              flex-shrink: 0;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            }
+            .topic-chip:hover {
+              background: #e2e8f0;
+              color: #1e293b;
+              transform: translateY(-2px);
+              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            }
+            .topic-chip:active {
+              transform: translateY(0);
+            }
+            .topic-chip.active {
+              background: #4f46e5;
+              color: white;
+              box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+              transform: translateY(-1px);
+            }
+            @media (prefers-color-scheme: dark) {
+              .topic-filters-container {
+                border-bottom-color: #2e303a;
+              }
+              .topic-chip {
+                background: #1f2028;
+                color: #9ca3af;
+              }
+              .topic-chip:hover {
+                background: #2e303a;
+                color: #f3f4f6;
+              }
+              .topic-chip.active {
+                background: #c084fc;
+                box-shadow: 0 4px 12px rgba(192, 132, 252, 0.3);
+              }
+            }
+          `}</style>
         </div>
 
         <footer style={{ textAlign: 'center', padding: '10px 0' }}>
